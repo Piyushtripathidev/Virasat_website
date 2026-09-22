@@ -36,20 +36,13 @@
   background: rgba(32, 24, 18, 0.94);
   border-bottom-color: rgba(232, 223, 210, 0.16);
 }
-/* Dark mode logo switching (replaces the old filter) */
-[data-theme="dark"] .logo-light {
-  display: none;
+
+/* ============ DARK MODE LOGO SWITCHING ============ */
+[data-theme="dark"] .logo .logo-light {
+  display: none !important;
 }
-[data-theme="dark"] .logo img {
-  mix-blend-mode: normal;
-  filter: brightness(0) invert(0.93);
-}
-[data-theme="dark"] .logo-dark {
-  display: block;
-}
-}
-[data-theme="dark"] .logo-dark {
-  display: block;
+[data-theme="dark"] .logo .logo-dark {
+  display: block !important;
 }
 
 [data-theme="dark"] .hero-full { background: #191009; }
