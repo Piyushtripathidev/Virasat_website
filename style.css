@@ -75,13 +75,30 @@ h1 em { font-style: italic; }
 }
 
 /* ============ LOGO (balanced size) ============ */
+/* ============ LOGO (balanced size) ============ */
 .logo img {
   width: 230px;
   height: 60px;
   object-fit: cover;
   object-position: center 51%;
-  mix-blend-mode: multiply;
   display: block;
+}
+
+.logo-light { display: block; }
+.logo-dark { display: none; }
+
+body.dark-mode .logo-light,
+body.dark-theme .logo-light {
+  display: none;
+}
+body.dark-mode .logo-dark,
+body.dark-theme .logo-dark {
+  display: block;
+}
+
+@media (prefers-color-scheme: dark) {
+  .logo-light { display: none; }
+  .logo-dark { display: block; }
 }
 
 .nav { display: flex; gap: 34px; }
@@ -374,3 +391,4 @@ figcaption { margin-top: 12px; display: block; opacity: 0.65; }
   .project-next-inner { flex-direction: column; align-items: flex-start; }
   .project-next-link { text-align: left; }
 }
+
