@@ -34,12 +34,14 @@
   background: rgba(32, 24, 18, 0.94);
   border-bottom-color: rgba(232, 223, 210, 0.16);
 }
-/* interim dark-mode logo: single-colour ivory (Guideline 05);
-   swap to logo-dark.png when the studio supplies it */
-[data-theme="dark"] .logo img {
-  mix-blend-mode: normal;
-  filter: brightness(0) invert(0.93);
+/* Dark mode logo switching (replaces the old filter) */
+[data-theme="dark"] .logo-light {
+  display: none;
 }
+[data-theme="dark"] .logo-dark {
+  display: block;
+}
+
 [data-theme="dark"] .hero-full { background: #191009; }
 [data-theme="dark"] .hero-copy h1 { color: #F7F2EA; }
 [data-theme="dark"] .philosophy { background: #2A2019; color: #EDE5DA; }
@@ -124,19 +126,11 @@ h1 em { font-style: italic; }
   display: block;
 }
 
-/* Add your dark mode logo switching code below */
+/* Default state (Light Mode) */
 .logo-light { display: block; }
 .logo-dark { display: none; }
 
-body.dark-mode .logo-light,
-body.dark-theme .logo-light {
-  display: none;
-}
-body.dark-mode .logo-dark,
-body.dark-theme .logo-dark {
-  display: block;
-}
-
+/* System preference dark mode */
 @media (prefers-color-scheme: dark) {
   .logo-light { display: none; }
   .logo-dark { display: block; }
