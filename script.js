@@ -1,4 +1,4 @@
-// ============ Mobile menu — full-screen editorial overlay (Version 25) ============
+// ============ Mobile menu — full-screen editorial overlay ============
 const menuBtn = document.getElementById("menuBtn");
 const nav = document.getElementById("nav");
 
@@ -56,9 +56,98 @@ if (themeToggle) {
 }
 syncToggle();
 
+// ============ Projects film strip (Version 31) ============
+const stripStage = document.getElementById("stripStage");
+const stripTrack = document.getElementById("stripTrack");
+const stripCount = document.getElementById("stripCount");
+const stripPrev  = document.getElementById("stripPrev");
+const stripNext  = document.getElementById("stripNext");
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+let stripIndex = 0;
+let stripTimer = null;
+const STRIP_MS = 5500;   // one framed print glides forward every 5.5 s
+
+function visibleCards() {
+  if (!stripTrack) return [];
+  return Array.from(stripTrack.querySelectorAll(".strip-card"))
+    .filter(card => !card.classList.contains("is-empty"));
+}
+
+function pad2(n) { return String(n).padStart(2, "0"); }
+
+function goCard(i) {
+  const cards = visibleCards();
+  if (!cards.length || !stripTrack || !stripStage) return;
+  stripIndex = (i + cards.length) % cards.length;
+  const first = cards[0];
+  const target = cards[stripIndex];
+  const maxShift = Math.max(stripTrack.scrollWidth - stripStage.clientWidth, 0);
+  const shift = Math.min(target.offsetLeft - first.offsetLeft, maxShift);
+  stripTrack.style.transform = "translateX(" + (-shift) + "px)";
+  if (stripCount) {
+    stripCount.textContent = pad2(Number(target.dataset.project)) + " / 06";
+  }
+}
+
+function nextCard() { goCard(stripIndex + 1); }
+function prevCard() { goCard(stripIndex - 1); }
+
+function stopStrip() { if (stripTimer) { clearInterval(stripTimer); stripTimer = null; } }
+function startStrip() {
+  if (reducedMotion) return;
+  stopStrip();
+  stripTimer = setInterval(nextCard, STRIP_MS);
+}
+
+if (stripNext) stripNext.addEventListener("click", () => { nextCard(); startStrip(); });
+if (stripPrev) stripPrev.addEventListener("click", () => { prevCard(); startStrip(); });
+
+if (stripStage) {
+  // pause while the visitor studies the prints
+  stripStage.addEventListener("mouseenter", stopStrip);
+  stripStage.addEventListener("mouseleave", startStrip);
+
+  // play only while the strip is on screen
+  if ("IntersectionObserver" in window) {
+    const viewObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) { startStrip(); }
+        else { stopStrip(); }
+      });
+    }, { threshold: 0.2 });
+    viewObserver.observe(stripStage);
+  } else {
+    startStrip();
+  }
+
+  // swipe on touch screens
+  let touchX = null;
+  stripStage.addEventListener("touchstart", e => {
+    touchX = e.touches[0].clientX;
+    stopStrip();
+  }, { passive: true });
+  stripStage.addEventListener("touchend", e => {
+    if (touchX !== null) {
+      const delta = e.changedTouches[0].clientX - touchX;
+      if (Math.abs(delta) > 40) { delta < 0 ? nextCard() : prevCard(); }
+    }
+    touchX = null;
+    startStrip();
+  }, { passive: true });
+}
+
+window.addEventListener("resize", () => goCard(stripIndex));
+goCard(0);
+
 // ============ Missing-photo safety net ============
 document.querySelectorAll("img").forEach(img => {
-  const hideMissing = () => img.classList.add("is-missing");
+  const hideMissing = () => {
+    img.classList.add("is-missing");
+    const card = img.closest(".strip-card");
+    if (card) card.classList.add("is-empty");
+    goCard(Math.min(stripIndex, Math.max(visibleCards().length - 1, 0)));
+  };
   if (img.complete && img.naturalWidth === 0) hideMissing();
   img.addEventListener("error", hideMissing);
 });
